@@ -1,0 +1,29 @@
+{
+  "name": "datagather",
+  "version": "0.0.1",
+  "description": "DataGather",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/enriquefynn/datagather"
+  },
+  "author": "Fynn",
+  "license": "BSD",
+  "bugs": {
+    "url": "https://github.com/enriquefynn/datagather/issues"
+  },
+  "homepage": "https://github.com/enriquefynn/datagather",
+  "dependencies": {
+    "co": "4.1.x",
+    "co-bcrypt": "1.0.x",
+    "koa": "0.15.x",
+    "koa-bodyparser": "1.3.x",
+    "koa-generic-session": "1.6.x",
+    "koa-logger": "1.2.x",
+    "koa-router": "3.8.x",
+    "mongoose": "3.8.x"
+  }
+}
