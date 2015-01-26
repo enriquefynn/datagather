@@ -8,8 +8,8 @@ var UserSchema = new Schema({
     username: {type: String, unique: true},
     password: String,
     locationLog: [new Schema({
-        latitude: Number,
-        longitude: Number,
+        lat: Number,
+        lon: Number,
         timestamp: Date
     }, {_id: false})],
     wifiLog: [new Schema({
@@ -51,24 +51,34 @@ UserSchema.pre('save', function(done){
 
 UserSchema.statics.getLastPositionTS = function* (id){
     var user = yield this.findOne(id).exec();
+    if (user.locationLog.length === 0)
+        return 0;
     return user.locationLog[user.locationLog.length-1].timestamp;
 };
 
 UserSchema.statics.getLastWifiTS = function* (id){
     var user = yield this.findOne(id).exec();
+    if (user.wifiLog.length === 0)
+        return 0;
     return user.wifiLog[user.wifiLog.length-1].timestamp;
 };
 
 UserSchema.statics.addLocationLogs = function* (id, logs){
     var user = yield this.findOne(id).exec();
-    var sortedLogs = logs.sort(function(a, b){
-        return a.timestamp - b.timestamp;
-    });
+    var sortedLogs;
+    if (logs.length <= 1)
+        sortedLogs = logs;
+    else
+        sortedLogs = logs.sort(function(a, b){
+            return a.timestamp - b.timestamp;
+        });
+
     for (var i = 0; i < sortedLogs.length; ++i)
     {
-        if (sortedLogs[i].timestamp > user.locationLog[user.locationLog.length -1].timestamp)
+        if (user.locationLog.length === 0 ||
+                sortedLogs[i].timestamp > user.locationLog[user.locationLog.length -1].timestamp)
         {
-            user.locationLog.concat(sortedLogs.slice(i));
+            user.locationLog = user.locationLog.concat(sortedLogs.slice(i));
             user.save(function(err){
                 if (err)
                     console.error(err);
@@ -81,14 +91,21 @@ UserSchema.statics.addLocationLogs = function* (id, logs){
 
 UserSchema.statics.addWifiLogs = function* (id, logs){
     var user = yield this.findOne(id).exec();
-    var sortedLogs = logs.sort(function(a, b){
-        return a.timestamp - b.timestamp;
-    });
+    var sortedLogs;
+
+    if (logs.length <= 1)
+        sortedLogs = logs;
+    else
+        sortedLogs = logs.sort(function(a, b){
+            return a.timestamp - b.timestamp;
+        });
+
     for (var i = 0; i < sortedLogs.length; ++i)
     {
-        if (sortedLogs[i].timestamp > user.wifiLog[user.wifiLog.length -1].timestamp)
+        if (user.wifiLog.length === 0 || 
+                sortedLogs[i].timestamp > user.wifiLog[user.wifiLog.length -1].timestamp)
         {
-            user.wifiLog.concat(sortedLogs.slice(i));
+            user.wifiLog = user.wifiLog.concat(sortedLogs.slice(i));
             user.save(function(err){
                 if (err)
                     console.error(err);

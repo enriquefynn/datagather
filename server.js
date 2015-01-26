@@ -36,7 +36,13 @@ publicRoute.get('/', function*(){
 
 publicRoute.post('/newUser', function*(){
     var newUser = this.request.body;
-    User.addUser(newUser.username, newUser.password);
+    try{
+        User.addUser(newUser.username, newUser.password);
+        this.status = 200;
+    }
+    catch(err){
+        this.status = 403;
+    }
 });
 
 publicRoute.post('/auth', function*(){
@@ -44,14 +50,46 @@ publicRoute.post('/auth', function*(){
     try{
         var userBd = yield User.matchUser(user.username, user.password);
         this.session.user = userBd._id;
-        console.log(userBd);
+        this.status = 200;
     }
     catch(err){
-        console.log(err);
+        this.status = 403;
+        console.error(err);
     }
 });
 
 app.use(publicRoute.middleware());
+
+app.use(function* (next){
+    if (this.session.user !== undefined)
+        yield next;
+    else
+        this.status = 403;
+});
+
+var secureRoute = new route();
+
+secureRoute.get('/lastLocation', function*(){
+    this.body = {timestamp: yield User.getLastPositionTS(this.session.user)};
+});
+
+secureRoute.get('/lastWifi', function*(){
+    this.body = {timestamp: yield User.getLastWifiTS(this.session.user)};
+});
+
+// [{lat: N, long: N, timestamp: N}, ...]
+secureRoute.post('/addLocation', function*(){
+    var locations = this.request.body;
+    this.body = {status: yield User.addLocationLogs(this.session.user, locations)};
+});
+
+// [{name: S, timestamp: N}, ...]
+secureRoute.post('/addWifi', function*(){
+    var wifi = this.request.body;
+    this.body = {status: yield User.addWifiLogs(this.session.user, wifi)};
+});
+
+app.use(secureRoute.middleware());
 
 app.listen(8080);
 
