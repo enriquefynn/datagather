@@ -77,7 +77,7 @@ secureRoute.get('/lastWifi', function*(){
     this.body = {timestamp: yield User.getLastWifiTS(this.session.user)};
 });
 
-// [{lat: N, long: N, timestamp: N}, ...]
+// [{lat: N, lon: N, timestamp: N}, ...]
 secureRoute.post('/addLocation', function*(){
     var locations = this.request.body;
     this.body = {status: yield User.addLocationLogs(this.session.user, locations)};
