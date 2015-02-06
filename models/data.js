@@ -26,7 +26,6 @@ var UserSchema = new Schema({
   }
 });
 
-
 UserSchema.pre('save', function(done){
     if (!this.isModified('password'))
         return done();
@@ -116,32 +115,25 @@ UserSchema.statics.addWifiLogs = function* (id, logs){
     return 'Unacceptable';
 };
 
-UserSchema.statics.addUser = function(username, password){
-    var newUser = new User();
-    newUser.username = username;
-    newUser.password = password;
-    newUser.save(function(err){
-        if (err)
-            console.error(err);
-        else
-            console.log('Created User', username);
-    });
-};
-
 UserSchema.methods.comparePassword = function* (candidatePassword) {  
-  return yield bcrypt.compare(candidatePassword, this.password);
+	return yield bcrypt.compare(candidatePassword, this.password);
 };
 
-UserSchema.statics.matchUser = function* (username, password) {  
-  var user = yield this.findOne({username: username}).exec();
-  if (!user) 
-      throw new Error('User not found');
+UserSchema.statics.matchUser = function (username, password) {  
+	var schema = this;
+	return co(function*(){
+		var user = yield schema.findOne({username: username}).exec();
+		if (!user)
+		{
+			console.log('Creating User');
+			user = yield schema.create({username: username, password: password});
+		}
 
-  if (yield user.comparePassword(password))
-    return user;
-
-  throw new Error('Password does not match');
-};
+		if (yield user.comparePassword(password))
+			return user;
+		throw new Error('Password does not match');
+	});
+}
 
 var User = mongoose.model('User', UserSchema);
 module.exports = User;

@@ -6,6 +6,10 @@ var session = require('koa-generic-session');
 var bodyparser = require('koa-bodyparser');
 var route = require('koa-router');
 var mongoose = require('mongoose');
+var forceSSL = require('koa-force-ssl');
+var https = require('https');
+var fs = require('fs');
+
 var config = require('./config');
 
 mongoose.connect('mongodb://localhost/datagather');
@@ -14,6 +18,7 @@ mongoose.connection.on('error', function(err){
 });
 
 var app = koa();
+app.use(forceSSL());
 app.keys = config.keys;
 
 app.use(session({
@@ -34,17 +39,6 @@ publicRoute.get('/', function*(){
     this.body = yield User.findOne(this.session.user).exec();
 });
 
-publicRoute.post('/newUser', function*(){
-    var newUser = this.request.body;
-    try{
-        User.addUser(newUser.username, newUser.password);
-        this.status = 200;
-    }
-    catch(err){
-        this.status = 403;
-    }
-});
-
 publicRoute.post('/auth', function*(){
     var user = this.request.body;
     try{
@@ -54,7 +48,7 @@ publicRoute.post('/auth', function*(){
     }
     catch(err){
         this.status = 403;
-        console.error(err);
+        console.error('/auth', err);
     }
 });
 
@@ -91,11 +85,19 @@ secureRoute.post('/addWifi', function*(){
 
 app.use(secureRoute.middleware());
 
-app.listen(8080);
+//app.listen(process.argv[2] || 8000);
 
 process.on('SIGINT', function() {
     console.log("Caught interrupt signal");
     process.exit();
 });
 
-console.log('Listening on 8080');
+console.log('Listening on', process.argv[2] || 8443);
+
+var options = {
+	hostname: 'slayer.dyndns-ip.com',
+	key: fs.readFileSync('server.key'),
+	cert: fs.readFileSync('server.crt')
+}
+
+https.createServer(options, app.callback()).listen(process.argv[2] || 8443);

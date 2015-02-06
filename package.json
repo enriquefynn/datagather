@@ -21,6 +21,7 @@
     "co-bcrypt": "1.0.x",
     "koa": "0.15.x",
     "koa-bodyparser": "1.3.x",
+    "koa-force-ssl": "0.0.4",
     "koa-generic-session": "1.6.x",
     "koa-logger": "1.2.x",
     "koa-router": "3.8.x",
