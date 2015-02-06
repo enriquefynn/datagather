@@ -2,6 +2,10 @@
 *.core
 *.log
 *.swp
+server.crt
+server.csr
+server.key
+server.key.org
 
 config.json
 node_modules
