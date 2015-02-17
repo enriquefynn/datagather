@@ -8,6 +8,7 @@ var route = require('koa-router');
 var mongoose = require('mongoose');
 var forceSSL = require('koa-force-ssl');
 var https = require('https');
+var http = require('http');
 var fs = require('fs');
 
 var config = require('./config');
@@ -30,7 +31,7 @@ app.use(bodyparser());
 
 var publicRoute = new route();
 
-publicRoute.get('/', function*(){
+publicRoute.get('/me', function*(){
     if (this.session.user === undefined)
     {
         this.status = 403;
@@ -85,19 +86,22 @@ secureRoute.post('/addWifi', function*(){
 
 app.use(secureRoute.middleware());
 
-//app.listen(process.argv[2] || 8000);
-
 process.on('SIGINT', function() {
     console.log("Caught interrupt signal");
     process.exit();
 });
 
-console.log('Listening on', process.argv[2] || 8443);
+console.log('Listening https server on', process.argv[2] || 8443);
 
-var options = {
+var httpsopts = {
 	hostname: 'slayer.dyndns-ip.com',
 	key: fs.readFileSync('server.key'),
 	cert: fs.readFileSync('server.crt')
 }
+/*var httpopts = {
+	hostname: 'slayer.dyndns-ip.com'
+}
+console.log('Listening http server on', process.argv[3] || 8000);
 
-https.createServer(options, app.callback()).listen(process.argv[2] || 8443);
+http.createServer(app.callback()).listen(process.argv[3] || 8000, 'slayer.dyndns-ip.com');*/
+https.createServer(httpsopts, app.callback()).listen(process.argv[2] || 8443);
