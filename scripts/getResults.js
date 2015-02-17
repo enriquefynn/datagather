@@ -16,24 +16,23 @@ co(function*(){
         var usersQ = User.find({});
         var users = yield usersQ.exec(); 
         for (var i = 0; i < users.length; ++i){
-            var userJSON = JSON.stringify(users[i]);
             var bigStr = "";
-            for (var j = 0; j < userJSON.wifiLog.length; ++j){
-                var timestamp = new Date(userJSON.wifiLog[j].timestamp).getTime();
-                var name = userJSON.wifiLog[j].name;
+            for (var j = 0; j < users[i].wifiLog.length; ++j){
+                var timestamp = new Date(users[i].wifiLog[j].timestamp).getTime();
+                var name = users[i].wifiLog[j].name;
                 bigStr+= timestamp + ' ' + name + '\n';
             }
-            fs.appendFileSync(userJSON.username + '-wifi.txt', 
+            fs.appendFileSync(users[i].username + '-wifi.txt', 
                 bigStr);
             bigStr = "";
-            for (var j = 0; j < userJSON.locationLog.length; ++j){
+            for (var j = 0; j < users[i].locationLog.length; ++j){
                 var timestamp = new Date(usesJSON.locationLog[j].timestamp).getTime();
-                var lat = userJSON.locationLog[j].lat;
-                var lon = userJSON.locationLog[j].lat;
+                var lat = users[i].locationLog[j].lat;
+                var lon = users[i].locationLog[j].lat;
                 bigStr+= timestamp + ' ' + lat + ' ' + lon + '\n';
             }
 
-            fs.appendFileSync(userJSON.username + '-gps.txt', 
+            fs.appendFileSync(users[i].username + '-gps.txt', 
                 bigStr);
             users[i].locationLog = [];
             users[i].wifiLog = [];
