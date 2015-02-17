@@ -11,6 +11,7 @@ mongoose.connection.on('error', function(err){
     console.error('Error connecting to db', err);
 });
 
+var cont = 0;
 co(function*(){
     try{
         var usersQ = User.find({});
