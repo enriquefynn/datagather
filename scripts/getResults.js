@@ -28,7 +28,7 @@ co(function*(){
             for (var j = 0; j < users[i].locationLog.length; ++j){
                 var timestamp = new Date(users[i].locationLog[j].timestamp).getTime();
                 var lat = users[i].locationLog[j].lat;
-                var lon = users[i].locationLog[j].lat;
+                var lon = users[i].locationLog[j].lon;
                 bigStr+= timestamp + ' ' + lat + ' ' + lon + '\n';
             }
 
