@@ -30,9 +30,10 @@ UserSchema.pre('save', function(done){
     if (!this.isModified('password'))
         return done();
     var user = this;
-    co(function *(){
+    co(function* (){
         try{
             var salt = yield bcrypt.genSalt();
+            console.log('yooo', salt);
             var hash = yield bcrypt.hash(user.password, salt);
             user.password = hash;
             done();
@@ -122,7 +123,10 @@ UserSchema.methods.comparePassword = function* (candidatePassword) {
 UserSchema.statics.matchUser = function (username, password) {  
 	var schema = this;
 	return co(function*(){
-		var user = yield schema.findOne({username: username}).exec();
+        var query = schema.findOne({username: username});
+        query.select('username password');
+        var user = yield query.exec();
+
 		if (!user)
 		{
 			console.log('Creating User');
