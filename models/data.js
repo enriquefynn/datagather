@@ -80,6 +80,7 @@ UserSchema.statics.addLocationLogs = function* (id, logs){
                 sortedLogs[i].timestamp > user.lastLocationTS)
         {
             user.locationLog = user.locationLog.concat(sortedLogs.slice(i));
+            user.lastLocationTS = sortedLogs[sortedLogs.length-1].timestamp;
             user.save(function(err){
                 if (err)
                     console.error(err);
@@ -109,6 +110,7 @@ UserSchema.statics.addWifiLogs = function* (id, logs){
                 sortedLogs[i].timestamp > user.lastWifiTS)
         {
             user.wifiLog = user.wifiLog.concat(sortedLogs.slice(i));
+            user.lastWifiTS = sortedLogs[sortedLogs.length-1].timestamp;
             user.save(function(err){
                 if (err)
                     console.error(err);
