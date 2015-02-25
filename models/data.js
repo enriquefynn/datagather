@@ -16,8 +16,8 @@ var UserSchema = new Schema({
         name: String,
         timestamp: Date
     }, {_id: false})],
-    lastWifiTS: Date,
-    lastLocationTS: Date
+    lastWifiTS: {type: Date, default: 0},
+    lastLocationTS: {type: Date, default: 0}
 },
 {
     toJSON: {
@@ -76,7 +76,7 @@ UserSchema.statics.addLocationLogs = function* (id, logs){
 
     for (var i = 0; i < sortedLogs.length; ++i)
     {
-        if (user.locationLog.length === 0 ||
+        if (user.lastLocationTS === 0 ||
                 sortedLogs[i].timestamp > user.lastLocationTS)
         {
             user.locationLog = user.locationLog.concat(sortedLogs.slice(i));
@@ -105,7 +105,7 @@ UserSchema.statics.addWifiLogs = function* (id, logs){
 
     for (var i = 0; i < sortedLogs.length; ++i)
     {
-        if (user.wifiLog.length === 0 || 
+        if (user.lastWifiTS === 0 || 
                 sortedLogs[i].timestamp > user.lastWifiTS)
         {
             user.wifiLog = user.wifiLog.concat(sortedLogs.slice(i));
