@@ -15,7 +15,9 @@ var UserSchema = new Schema({
     wifiLog: [new Schema({
         name: String,
         timestamp: Date
-    }, {_id: false})]
+    }, {_id: false})],
+    lastWifiTS: Date,
+    lastLocationTS: Date
 },
 {
     toJSON: {
@@ -50,21 +52,21 @@ UserSchema.pre('save', function(done){
 });
 
 UserSchema.statics.getLastPositionTS = function* (id){
-    var user = yield this.findOne(id).exec();
-    if (user.locationLog.length === 0)
-        return 0;
-    return user.locationLog[user.locationLog.length-1].timestamp;
+    var query = schema.findOneById(id);
+    query.select('lastLocationTS');
+    return yield query.exec().lastLocationTS;
 };
 
 UserSchema.statics.getLastWifiTS = function* (id){
-    var user = yield this.findOne(id).exec();
-    if (user.wifiLog.length === 0)
-        return 0;
-    return user.wifiLog[user.wifiLog.length-1].timestamp;
+    var query = schema.findOneById(id);
+    query.select('lastWifiTS');
+    return yield query.exec().lastWifiTS;
 };
 
 UserSchema.statics.addLocationLogs = function* (id, logs){
-    var user = yield this.findOne(id).exec();
+    var query = schema.findOneById(id);
+    query.select('locationLog lastLocationTS');
+    var user = yield query.exec();
     var sortedLogs;
     if (logs.length <= 1)
         sortedLogs = logs;
@@ -76,7 +78,7 @@ UserSchema.statics.addLocationLogs = function* (id, logs){
     for (var i = 0; i < sortedLogs.length; ++i)
     {
         if (user.locationLog.length === 0 ||
-                sortedLogs[i].timestamp > user.locationLog[user.locationLog.length -1].timestamp)
+                sortedLogs[i].timestamp > user.lastLocationTS)
         {
             user.locationLog = user.locationLog.concat(sortedLogs.slice(i));
             user.save(function(err){
@@ -90,7 +92,9 @@ UserSchema.statics.addLocationLogs = function* (id, logs){
 };
 
 UserSchema.statics.addWifiLogs = function* (id, logs){
-    var user = yield this.findOne(id).exec();
+    var query = schema.findOneById(id);
+    query.select('wifiLog lastWifiTS');
+    var user = yield query.exec();
     var sortedLogs;
 
     if (logs.length <= 1)
@@ -103,7 +107,7 @@ UserSchema.statics.addWifiLogs = function* (id, logs){
     for (var i = 0; i < sortedLogs.length; ++i)
     {
         if (user.wifiLog.length === 0 || 
-                sortedLogs[i].timestamp > user.wifiLog[user.wifiLog.length -1].timestamp)
+                sortedLogs[i].timestamp > user.lastWifiTS)
         {
             user.wifiLog = user.wifiLog.concat(sortedLogs.slice(i));
             user.save(function(err){
@@ -123,7 +127,7 @@ UserSchema.methods.comparePassword = function* (candidatePassword) {
 UserSchema.statics.matchUser = function (username, password) {  
 	var schema = this;
 	return co(function*(){
-        var query = schema.findOne({username: username});
+        var query = schema.findOneById({username: username});
         query.select('username password');
         var user = yield query.exec();
 
