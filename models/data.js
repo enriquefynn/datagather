@@ -52,19 +52,19 @@ UserSchema.pre('save', function(done){
 });
 
 UserSchema.statics.getLastPositionTS = function* (id){
-    var query = schema.findOneById(id);
+    var query = schema.findById(id);
     query.select('lastLocationTS');
     return yield query.exec().lastLocationTS;
 };
 
 UserSchema.statics.getLastWifiTS = function* (id){
-    var query = schema.findOneById(id);
+    var query = schema.findById(id);
     query.select('lastWifiTS');
     return yield query.exec().lastWifiTS;
 };
 
 UserSchema.statics.addLocationLogs = function* (id, logs){
-    var query = schema.findOneById(id);
+    var query = schema.findById(id);
     query.select('locationLog lastLocationTS');
     var user = yield query.exec();
     var sortedLogs;
@@ -92,7 +92,7 @@ UserSchema.statics.addLocationLogs = function* (id, logs){
 };
 
 UserSchema.statics.addWifiLogs = function* (id, logs){
-    var query = schema.findOneById(id);
+    var query = schema.findById(id);
     query.select('wifiLog lastWifiTS');
     var user = yield query.exec();
     var sortedLogs;
@@ -127,7 +127,8 @@ UserSchema.methods.comparePassword = function* (candidatePassword) {
 UserSchema.statics.matchUser = function (username, password) {  
 	var schema = this;
 	return co(function*(){
-        var query = schema.findOneById({username: username});
+        console.log('ERTA');
+        var query = schema.findOne({username: username});
         query.select('username password');
         var user = yield query.exec();
 
