@@ -85,3 +85,5 @@ POST /addWifi
 
 All the data is inserted ordered in BD, doesn't matter if they're
 not at /addLocation or /addWifi
+
+Running ./scripts/getResults.js can save space in DB.
